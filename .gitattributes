@@ -1,0 +1,35 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Frontend specific
+frontend/*.js text
+frontend/*.jsx text
+frontend/*.ts text
+frontend/*.tsx text
+frontend/*.json text
+frontend/*.css text
+frontend/*.scss text
+frontend/*.md text
+
+# Backend specific
+backend/*.py text
+backend/*.txt text
+backend/*.md text
+backend/*.json text
+backend/*.yaml text
+backend/*.yml text
+
+# Documentation
+*.md text
+*.txt text
+
+# Config files
+.env* text
+.gitattributes text
+.gitignore text
+.eslintrc* text
+.prettierrc* text
+tsconfig.json text
+next.config.js text
+package.json text
+requirements.txt text 

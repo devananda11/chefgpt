@@ -5,11 +5,17 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
+interface Ingredient {
+  name: string;
+  amount: string;
+  unit: string;
+}
+
 interface Recipe {
   id: string;
   title: string;
   description: string;
-  ingredients: any[];
+  ingredients: Ingredient[];
   instructions: string[];
   cooking_time: {
     prep_time: number;
@@ -93,7 +99,7 @@ export default function RecipesPage() {
 
       {recipes.length === 0 ? (
         <div className="text-center text-gray-500 py-8">
-          You haven't saved any recipes yet. Create your first recipe!
+          You haven&apos;t saved any recipes yet. Create your first recipe!
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

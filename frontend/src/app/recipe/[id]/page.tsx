@@ -5,11 +5,17 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
+interface Ingredient {
+  name: string;
+  amount: string;
+  unit: string;
+}
+
 interface Recipe {
   id: string;
   title: string;
   description: string;
-  ingredients: any[];
+  ingredients: Ingredient[];
   instructions: string[];
   cooking_time: {
     prep_time: number;
@@ -68,8 +74,8 @@ export default function RecipePage({ params }: { params: { id: string } }) {
 
       if (error) throw error;
       setRating(newRating);
-    } catch (err) {
-      console.error('Error rating recipe:', err);
+    } catch (error) {
+      console.error('Error rating recipe:', error);
       setError('Failed to rate recipe');
     } finally {
       setIsRating(false);
