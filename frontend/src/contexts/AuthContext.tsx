@@ -8,10 +8,8 @@ import { useRouter } from 'next/navigation';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, name: string) => Promise<void>;
-  signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,29 +35,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    const { error, data } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      throw error;
-    }
-
-    // Set user metadata if not present
-    if (data.user && !data.user.user_metadata.name) {
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: { name: email.split('@')[0] }
-      });
-      if (updateError) {
-        console.error('Error updating user metadata:', updateError);
-      }
-    }
-
-    router.push('/recipes');
-  };
-
   const signInWithGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -70,32 +45,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (error) {
       throw error;
-    }
-  };
-
-  const signUp = async (email: string, password: string, name: string) => {
-    const { error: signUpError, data } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
-        },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-
-    if (signUpError) {
-      throw signUpError;
-    }
-
-    // Check if email confirmation is required
-    if (data.user && !data.session) {
-      throw new Error('Please check your email for a confirmation link to complete your registration.');
-    }
-
-    if (data.user) {
-      router.push('/recipes');
     }
   };
 
@@ -110,10 +59,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     user,
     loading,
-    signIn,
-    signUp,
-    signOut,
     signInWithGoogle,
+    signOut,
   };
 
   return (

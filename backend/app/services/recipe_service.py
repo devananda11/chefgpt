@@ -8,7 +8,12 @@ import json
 load_dotenv()
 
 # Configure Google AI
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+api_key = os.getenv("GOOGLE_API_KEY")
+if not api_key:
+    raise ValueError("GOOGLE_API_KEY environment variable is not set")
+
+print("Configuring Google AI with API key...")
+genai.configure(api_key=api_key)
 model = genai.GenerativeModel('gemini-1.5-flash')  # Using Gemini 1.5 Flash
 
 async def generate_recipe(
@@ -20,14 +25,13 @@ async def generate_recipe(
 ) -> Dict:
     """
     Generate a recipe based on provided ingredients and preferences using Gemini AI.
-    
-    Args:
-        ingredients: List of ingredients to use
-        dietary_preferences: Optional list of dietary preferences (e.g., ["vegetarian", "gluten-free"])
-        cooking_time: Optional maximum cooking time in minutes
-        difficulty: Optional difficulty level ("easy", "medium", "hard")
-        servings: Optional number of servings
     """
+    print(f"Generating recipe with ingredients: {ingredients}")
+    print(f"Dietary preferences: {dietary_preferences}")
+    print(f"Cooking time: {cooking_time}")
+    print(f"Difficulty: {difficulty}")
+    print(f"Servings: {servings}")
+
     # Build the prompt with all available information
     prompt_parts = [
         f"Create a recipe using these ingredients: {', '.join(ingredients)}"
@@ -43,7 +47,7 @@ async def generate_recipe(
         prompt_parts.append(f"Number of servings: {servings}")
 
     prompt_parts.append("""
-    Format the response as a JSON object with the following structure:
+    Return a JSON object with the following structure. Make sure to use proper JSON formatting with double quotes for all keys and string values:
     {
         "title": "Recipe name",
         "description": "Brief description of the recipe",
@@ -55,32 +59,24 @@ async def generate_recipe(
             }
         ],
         "instructions": [
-            {
-                "step": 1,
-                "description": "detailed step description"
-            }
+            "Step 1 description",
+            "Step 2 description"
         ],
         "cooking_time": {
-            "prep_time": minutes,
-            "cook_time": minutes,
-            "total_time": minutes
+            "prep_time": 10,
+            "cook_time": 20,
+            "total_time": 30
         },
-        "difficulty": "easy/medium/hard",
-        "servings": number,
-        "nutritional_info": {
-            "calories": number,
-            "protein": "grams",
-            "carbs": "grams",
-            "fat": "grams"
-        },
-        "tags": ["tag1", "tag2"],
-        "tips": ["tip1", "tip2"]
+        "difficulty": "easy",
+        "servings": 4
     }
     """)
 
     prompt = "\n".join(prompt_parts)
+    print(f"Generated prompt: {prompt}")
     
     try:
+        print("Calling Gemini API...")
         # Configure generation parameters for better results
         generation_config = {
             "temperature": 0.7,
@@ -93,14 +89,24 @@ async def generate_recipe(
             prompt,
             generation_config=generation_config
         )
+        print("Received response from Gemini API")
         recipe_json = response.text
+        print(f"Raw AI response: {recipe_json}")
         
         # Clean up the response to ensure it's valid JSON
-        # Sometimes the model might include markdown code blocks
         recipe_json = recipe_json.replace("```json", "").replace("```", "").strip()
+        
+        # Try to find the JSON object in the response
+        start_idx = recipe_json.find("{")
+        end_idx = recipe_json.rfind("}") + 1
+        if start_idx >= 0 and end_idx > start_idx:
+            recipe_json = recipe_json[start_idx:end_idx]
+        
+        print(f"Cleaned JSON: {recipe_json}")
         
         # Parse the JSON response
         recipe_data = json.loads(recipe_json)
+        print(f"Parsed recipe data: {recipe_data}")
         
         # Validate required fields
         required_fields = ["title", "ingredients", "instructions", "cooking_time", "difficulty", "servings"]
@@ -111,8 +117,11 @@ async def generate_recipe(
         return recipe_data
         
     except json.JSONDecodeError as e:
+        print(f"JSON decode error: {str(e)}")
+        print(f"Raw AI response: {recipe_json}")
         raise ValueError(f"Failed to parse AI response as JSON: {str(e)}")
     except Exception as e:
+        print(f"Error in generate_recipe: {str(e)}")
         raise Exception(f"Error generating recipe: {str(e)}")
 
 async def save_recipe(recipe_data: Dict, user_id: str) -> Dict:
@@ -125,13 +134,18 @@ async def save_recipe(recipe_data: Dict, user_id: str) -> Dict:
         "cooking_time": recipe_data["cooking_time"],
         "difficulty": recipe_data["difficulty"],
         "servings": recipe_data["servings"],
-        "nutritional_info": recipe_data.get("nutritional_info", {}),
-        "tags": recipe_data.get("tags", []),
-        "tips": recipe_data.get("tips", []),
         "user_id": user_id,
         "rating": 0,
         "total_ratings": 0
     }
+    
+    # Only add optional fields if they exist in the recipe data
+    if "nutritional_info" in recipe_data:
+        recipe["nutritional_info"] = recipe_data["nutritional_info"]
+    if "tags" in recipe_data:
+        recipe["tags"] = recipe_data["tags"]
+    if "tips" in recipe_data:
+        recipe["tips"] = recipe_data["tips"]
     
     result = supabase.table("recipes").insert(recipe).execute()
     return result.data[0]

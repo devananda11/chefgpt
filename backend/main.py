@@ -28,13 +28,19 @@ class RecipeGenerationRequest(BaseModel):
     cooking_time: Optional[int] = None
     difficulty: Optional[str] = None
     servings: Optional[int] = None
+    user_id: Optional[str] = None  # Make user_id optional
 
 @app.get("/")
 async def root():
     return {"message": "Welcome to ChefGPT API"}
 
+@app.get("/test")
+async def test():
+    """Test endpoint to check if server is running."""
+    return {"status": "ok", "message": "Server is running"}
+
 @app.post("/generate-recipe")
-async def create_recipe(request: RecipeGenerationRequest, user_id: str):
+async def create_recipe(request: RecipeGenerationRequest):
     """
     Generate a recipe based on ingredients and preferences.
     
@@ -46,6 +52,7 @@ async def create_recipe(request: RecipeGenerationRequest, user_id: str):
     - servings: Optional number of servings
     """
     try:
+        print("Received recipe generation request:", request.dict())
         recipe_data = await generate_recipe(
             ingredients=request.ingredients,
             dietary_preferences=request.dietary_preferences,
@@ -53,11 +60,13 @@ async def create_recipe(request: RecipeGenerationRequest, user_id: str):
             difficulty=request.difficulty,
             servings=request.servings
         )
-        saved_recipe = await save_recipe(recipe_data, user_id)
-        return saved_recipe
+        
+        return recipe_data
     except ValueError as e:
+        print(f"Validation error: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        print(f"Error generating recipe: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/recipes/{user_id}")

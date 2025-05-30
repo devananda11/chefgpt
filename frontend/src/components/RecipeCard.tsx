@@ -1,87 +1,107 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-interface RecipeCardProps {
+interface Ingredient {
+  name: string;
+  amount: string;
+  unit: string;
+}
+
+interface CookingTime {
+  cook_time: number;
+  prep_time: number;
+  total_time: number;
+}
+
+interface Recipe {
   id: string;
   title: string;
   description: string;
-  imageUrl: string;
-  cookingTime: number;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
+  ingredients: Ingredient[];
+  instructions: string[];
+  cooking_time: CookingTime;
+  difficulty: string;
+  servings: number;
   rating: number;
+  created_at: string;
 }
 
-const RecipeCard = ({ id, title, description, imageUrl, cookingTime, difficulty, rating }: RecipeCardProps) => {
-  const [isSaved, setIsSaved] = useState(false);
+interface RecipeCardProps {
+  recipe: Recipe;
+  onDelete?: () => void;
+}
 
-  const handleSave = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsSaved(!isSaved);
-    // TODO: Implement save functionality with backend
+export default function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
+  const router = useRouter();
+
+  const handleGenerateAnother = () => {
+    router.push('/create');
   };
 
   return (
-    <Link href={`/recipes/${id}`} className="block">
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-        <div className="relative h-48">
-          <Image
-            src={imageUrl}
-            alt={title}
-            fill
-            className="object-cover"
-          />
-          <button
-            onClick={handleSave}
-            className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm hover:bg-gray-100"
-          >
-            <svg
-              className={`w-5 h-5 ${isSaved ? 'text-red-500' : 'text-gray-500'}`}
-              fill={isSaved ? 'currentColor' : 'none'}
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-              />
-            </svg>
-          </button>
-        </div>
-        <div className="p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-          <p className="text-gray-500 text-sm mb-4 line-clamp-2">{description}</p>
-          <div className="flex items-center justify-between text-sm text-gray-500">
-            <div className="flex items-center space-x-4">
-              <span className="flex items-center">
-                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                  <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                </svg>
-                {cookingTime} min
-              </span>
-              <span className="flex items-center">
-                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                </svg>
-                {difficulty}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <svg className="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-              {rating.toFixed(1)}
-            </div>
+    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div className="p-6">
+        <div className="flex justify-between items-start mb-4">
+          <h3 className="text-xl font-semibold text-gray-500">{recipe.title}</h3>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-500">{recipe.difficulty}</span>
+            <span className="text-sm text-gray-500">•</span>
+            <span className="text-sm text-gray-500">{recipe.cooking_time.total_time} mins</span>
           </div>
         </div>
-      </div>
-    </Link>
-  );
-};
 
-export default RecipeCard; 
+        <p className="text-gray-600 mb-4">{recipe.description}</p>
+
+        <div className="mb-4">
+          <h4 className="font-medium text-gray-500 mb-2">Ingredients:</h4>
+          <ul className="list-disc list-inside text-gray-600">
+            {recipe.ingredients.map((ingredient, index) => (
+              <li key={index}>
+                {ingredient.amount} {ingredient.unit} {ingredient.name}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mb-4">
+          <h4 className="font-medium text-gray-500 mb-2">Instructions:</h4>
+          <ol className="list-decimal list-inside text-gray-600">
+            {recipe.instructions.map((instruction, index) => (
+              <li key={index} className="mb-2">{instruction}</li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+          <div className="space-y-1">
+            <div>Prep Time: {recipe.cooking_time.prep_time} mins</div>
+            <div>Cook Time: {recipe.cooking_time.cook_time} mins</div>
+            <div>Total Time: {recipe.cooking_time.total_time} mins</div>
+          </div>
+          <div className="space-y-1">
+            <div>Servings: {recipe.servings}</div>
+            <div>Rating: {recipe.rating}/5</div>
+          </div>
+        </div>
+
+        <div className="flex justify-end space-x-3">
+          {onDelete && (
+            <button
+              onClick={onDelete}
+              className="text-red-600 hover:text-red-700 px-4 py-2 rounded-md font-medium"
+            >
+              Delete
+            </button>
+          )}
+          <button
+            onClick={handleGenerateAnother}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700"
+          >
+            Generate Another Recipe
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+} 

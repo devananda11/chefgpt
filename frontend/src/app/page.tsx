@@ -20,10 +20,10 @@ export default function Home() {
             Get Started
           </Link>
           <Link
-            href="/signup"
+            href="/login"
             className="bg-white text-blue-600 px-8 py-3 rounded-md font-medium border border-blue-600 hover:bg-blue-50 transition-colors"
           >
-            Sign Up Free
+            Sign In
           </Link>
         </div>
       </section>
@@ -74,7 +74,7 @@ export default function Home() {
           Join thousands of food lovers who are discovering new recipes every day.
         </p>
         <Link
-          href="/signup"
+          href="/login"
           className="bg-white text-blue-600 px-8 py-3 rounded-md font-medium hover:bg-gray-100 transition-colors"
         >
           Get Started Now
