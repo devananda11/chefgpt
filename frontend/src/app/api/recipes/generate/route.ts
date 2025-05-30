@@ -13,6 +13,24 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+interface RecipeResponse {
+  title: string;
+  description: string;
+  ingredients: Array<{
+    name: string;
+    amount: string;
+    unit: string;
+  }>;
+  instructions: string[];
+  cooking_time: {
+    prep_time: number;
+    cook_time: number;
+    total_time: number;
+  };
+  difficulty: string;
+  servings: number;
+}
+
 export async function POST(request: Request) {
   try {
     // Get the session from the request
@@ -77,6 +95,7 @@ export async function POST(request: Request) {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
       },
       body: JSON.stringify({
         ingredients: ingredients.map(i => i.name),
@@ -97,27 +116,27 @@ export async function POST(request: Request) {
       );
     }
 
-    const generatedRecipe = await response.json();
-    console.log('Generated recipe:', generatedRecipe);
+    const recipe: RecipeResponse = await response.json();
+    console.log('Generated recipe:', recipe);
 
     // Format the recipe data according to our schema
     const recipeData = {
       user_id: user.id,
-      title: generatedRecipe.title,
-      description: generatedRecipe.description,
-      ingredients: generatedRecipe.ingredients.map((ing: any) => ({
+      title: recipe.title,
+      description: recipe.description,
+      ingredients: recipe.ingredients.map((ing: any) => ({
         name: ing.name,
         amount: ing.amount || '',
         unit: ing.unit || ''
       })),
-      instructions: generatedRecipe.instructions,
+      instructions: recipe.instructions,
       cooking_time: {
-        prep_time: generatedRecipe.cooking_time?.prep_time || 0,
-        cook_time: generatedRecipe.cooking_time?.cook_time || 0,
-        total_time: generatedRecipe.cooking_time?.total_time || 0
+        prep_time: recipe.cooking_time?.prep_time || 0,
+        cook_time: recipe.cooking_time?.cook_time || 0,
+        total_time: recipe.cooking_time?.total_time || 0
       },
-      difficulty: generatedRecipe.difficulty || 'medium',
-      servings: generatedRecipe.servings || 4,
+      difficulty: recipe.difficulty || 'medium',
+      servings: recipe.servings || 4,
       rating: 0
     };
 
