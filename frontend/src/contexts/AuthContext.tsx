@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  supabase: typeof supabase;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -59,6 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     user,
     loading,
+    supabase,
     signInWithGoogle,
     signOut,
   };
