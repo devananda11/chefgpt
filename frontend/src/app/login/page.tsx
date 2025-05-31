@@ -29,9 +29,7 @@ export default function LoginPage() {
   return (
     <AuthLayout>
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl text-gray font-extrabold text-[var(--foreground)]">
-          Welcome to ChefGPT
-        </h2>
+        
         <p className="mt-2 text-center text-sm text-gray-400">
           Sign in to start creating and discovering recipes
         </p>

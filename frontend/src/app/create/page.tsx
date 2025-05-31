@@ -211,34 +211,40 @@ export default function CreateRecipePage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-8">
             <h2 className="text-xl font-semibold text-gray-500 mb-4">Add Ingredients</h2>
             
-            <div className="flex gap-4 mb-4">
-              <input
-                type="text"
-                placeholder="Amount"
-                value={newIngredient.amount}
-                onChange={(e) => setNewIngredient({ ...newIngredient, amount: e.target.value })}
-                className="flex-1 p-2 border rounded-md text-gray-500"
-              />
-              <input
-                type="text"
-                placeholder="Unit"
-                value={newIngredient.unit}
-                onChange={(e) => setNewIngredient({ ...newIngredient, unit: e.target.value })}
-                className="flex-1 p-2 border rounded-md text-gray-500"
-              />
-              <input
-                type="text"
-                placeholder="Ingredient name"
-                value={newIngredient.name}
-                onChange={(e) => setNewIngredient({ ...newIngredient, name: e.target.value })}
-                className="flex-2 p-2 border rounded-md text-gray-500"
-              />
+            <div className="flex flex-col sm:flex-row gap-4 mb-4">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="Amount"
+                  value={newIngredient.amount}
+                  onChange={(e) => setNewIngredient({ ...newIngredient, amount: e.target.value })}
+                  className="w-full p-2 border rounded-md text-gray-500"
+                />
+              </div>
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="Unit"
+                  value={newIngredient.unit}
+                  onChange={(e) => setNewIngredient({ ...newIngredient, unit: e.target.value })}
+                  className="w-full p-2 border rounded-md text-gray-500"
+                />
+              </div>
+              <div className="flex-2">
+                <input
+                  type="text"
+                  placeholder="Ingredient name"
+                  value={newIngredient.name}
+                  onChange={(e) => setNewIngredient({ ...newIngredient, name: e.target.value })}
+                  className="w-full p-2 border rounded-md text-gray-500"
+                />
+              </div>
               <button
                 onClick={handleAddIngredient}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 w-full sm:w-auto"
               >
                 Add
               </button>
@@ -255,7 +261,7 @@ export default function CreateRecipePage() {
                       </span>
                       <button
                         onClick={() => handleRemoveIngredient(index)}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-red-500 hover:text-red-700 p-1"
                       >
                         Remove
                       </button>
@@ -270,38 +276,16 @@ export default function CreateRecipePage() {
                 {error}
               </div>
             )}
-
-            <button
-              onClick={handleGenerateRecipe}
-              disabled={isGenerating || ingredients.length === 0}
-              className={`w-full py-2 px-4 rounded-md text-white ${
-                isGenerating || ingredients.length === 0
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700'
-              }`}
-            >
-              {isGenerating ? (
-                <div className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Generating Recipe...
-                </div>
-              ) : (
-                'Generate Recipe'
-              )}
-            </button>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-            <h2 className="text-xl font-semibold text-gray-500 mb-4">Dietary Preferences & Restrictions</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-8">
+            <h2 className="text-xl font-semibold text-gray-500 mb-4">Dietary Preferences</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
               {DIETARY_PREFERENCES.map((preference) => (
                 <button
                   key={preference}
                   onClick={() => togglePreference(preference)}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`p-2 rounded-md text-sm ${
                     selectedPreferences.includes(preference)
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
@@ -311,6 +295,20 @@ export default function CreateRecipePage() {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className="flex justify-center">
+            <button
+              onClick={handleGenerateRecipe}
+              disabled={isGenerating}
+              className={`w-full sm:w-auto px-6 py-3 rounded-md text-white font-medium ${
+                isGenerating
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700'
+              }`}
+            >
+              {isGenerating ? 'Generating...' : 'Generate Recipe'}
+            </button>
           </div>
         </>
       ) : (
