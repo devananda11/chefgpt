@@ -10,7 +10,7 @@ load_dotenv()
 app = FastAPI(title="ChefGPT API")
 
 # Get CORS origins from environment variable
-cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,https://chefgpt-two.vercel.app").split(",")
 
 # Configure CORS
 app.add_middleware(

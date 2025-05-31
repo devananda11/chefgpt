@@ -148,7 +148,7 @@ export default function RecipeDetailPage() {
       <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{recipe.title}</h1>
+            <h1 className="text-3xl font-bold text-gray-500 mb-2">{recipe.title}</h1>
             <p className="text-gray-700">{recipe.description}</p>
           </div>
           {user && (
