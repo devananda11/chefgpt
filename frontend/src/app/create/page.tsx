@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { generateRecipe } from '@/lib/api';
 
 interface Ingredient {
   name: string;
@@ -88,37 +89,16 @@ export default function CreateRecipePage() {
       setError('');
       setGeneratedRecipe(null);
 
-      // Get the current session
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('No active session found');
-      }
-
       console.log('Sending ingredients:', ingredients);
 
-      // Send request directly to backend
-      const response = await fetch(`${BACKEND_URL}/generate-recipe`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify({
-          ingredients: ingredients.map(i => i.name),
-          dietary_preferences: selectedPreferences,
-          cooking_time: recipeParams.cook_time,
-          difficulty: recipeParams.difficulty.toLowerCase(),
-          servings: recipeParams.servings
-        })
+      const recipe = await generateRecipe({
+        ingredients: ingredients.map(i => i.name),
+        dietary_preferences: selectedPreferences,
+        cooking_time: recipeParams.cook_time,
+        difficulty: recipeParams.difficulty.toLowerCase(),
+        servings: recipeParams.servings
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error response:', errorData);
-        throw new Error(errorData.detail || 'Failed to generate recipe');
-      }
-
-      const recipe = await response.json();
       console.log('Generated recipe:', recipe);
       setGeneratedRecipe(recipe);
     } catch (err) {

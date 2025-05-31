@@ -7,7 +7,7 @@ export async function generateRecipe(data: {
   difficulty?: string;
   servings?: number;
 }) {
-  const response = await fetch(`${API_URL}/generate-recipe`, {
+  const response = await fetch(`${API_URL}/recipes/generate`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -16,7 +16,8 @@ export async function generateRecipe(data: {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to generate recipe');
+    const errorData = await response.text();
+    throw new Error(`Failed to generate recipe: ${errorData}`);
   }
 
   return response.json();
@@ -26,7 +27,8 @@ export async function getUserRecipes(userId: string) {
   const response = await fetch(`${API_URL}/recipes/${userId}`);
 
   if (!response.ok) {
-    throw new Error('Failed to fetch recipes');
+    const errorData = await response.text();
+    throw new Error(`Failed to fetch recipes: ${errorData}`);
   }
 
   return response.json();
@@ -42,7 +44,8 @@ export async function rateRecipe(recipeId: string, rating: number) {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to rate recipe');
+    const errorData = await response.text();
+    throw new Error(`Failed to rate recipe: ${errorData}`);
   }
 
   return response.json();
