@@ -50,11 +50,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      throw error;
+    try {
+      // First try to get the current session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        // If no session exists, just clear local storage and redirect
+        localStorage.removeItem('sb-auth-token');
+        window.location.href = '/';
+        return;
+      }
+
+      // If session exists, try to sign out
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Error signing out:', error.message);
+        throw error;
+      }
+      
+      // Clear any local storage items
+      localStorage.removeItem('sb-auth-token');
+      
+      // Force a hard refresh to clear any cached state
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Even if there's an error, try to clear local storage and redirect
+      localStorage.removeItem('sb-auth-token');
+      window.location.href = '/';
     }
-    router.push('/');
   };
 
   const value = {
