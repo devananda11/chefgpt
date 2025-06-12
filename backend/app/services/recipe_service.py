@@ -70,6 +70,7 @@ async def generate_recipe(
         "difficulty": "easy",
         "servings": 4
     }
+    IMPORTANT: Return ONLY the JSON object, no additional text or markdown formatting.
     """)
 
     prompt = "\n".join(prompt_parts)
@@ -101,25 +102,38 @@ async def generate_recipe(
         end_idx = recipe_json.rfind("}") + 1
         if start_idx >= 0 and end_idx > start_idx:
             recipe_json = recipe_json[start_idx:end_idx]
+        else:
+            raise ValueError("No valid JSON object found in the response")
         
         print(f"Cleaned JSON: {recipe_json}")
         
         # Parse the JSON response
-        recipe_data = json.loads(recipe_json)
+        try:
+            recipe_data = json.loads(recipe_json)
+        except json.JSONDecodeError as e:
+            print(f"JSON decode error: {str(e)}")
+            print(f"Raw AI response: {recipe_json}")
+            # Try to fix common JSON formatting issues
+            recipe_json = recipe_json.replace("'", '"')  # Replace single quotes with double quotes
+            recipe_json = recipe_json.replace("None", "null")  # Replace Python None with JSON null
+            try:
+                recipe_data = json.loads(recipe_json)
+            except json.JSONDecodeError as e2:
+                raise ValueError(f"Failed to parse AI response as JSON: {str(e2)}\nRaw response: {recipe_json}")
+        
         print(f"Parsed recipe data: {recipe_data}")
         
         # Validate required fields
         required_fields = ["title", "ingredients", "instructions", "cooking_time", "difficulty", "servings"]
-        for field in required_fields:
-            if field not in recipe_data:
-                raise ValueError(f"Missing required field: {field}")
+        missing_fields = [field for field in required_fields if field not in recipe_data]
+        if missing_fields:
+            raise ValueError(f"Missing required fields: {', '.join(missing_fields)}")
         
         return recipe_data
         
-    except json.JSONDecodeError as e:
-        print(f"JSON decode error: {str(e)}")
-        print(f"Raw AI response: {recipe_json}")
-        raise ValueError(f"Failed to parse AI response as JSON: {str(e)}")
+    except ValueError as e:
+        print(f"Value error in generate_recipe: {str(e)}")
+        raise ValueError(str(e))
     except Exception as e:
         print(f"Error in generate_recipe: {str(e)}")
         raise Exception(f"Error generating recipe: {str(e)}")
